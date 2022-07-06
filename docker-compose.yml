@@ -1,0 +1,8 @@
+version: '3.8'
+
+services:
+  consul:
+    container_name: gateway_consul
+    image: consul:latest
+    ports:
+      - 8500:8500
