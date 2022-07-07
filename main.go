@@ -1,7 +1,11 @@
-package E_Com_Gateway
+/*
+Copyright © 2022 NAME HERE <EMAIL ADDRESS>
 
-import "fmt"
+*/
+package main
+
+import "github.com/rifatikbal/E-Com-Gateway/cmd"
 
 func main() {
-	fmt.Print("hello ecom")
+	cmd.Execute()
 }
