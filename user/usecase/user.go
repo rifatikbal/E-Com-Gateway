@@ -18,3 +18,13 @@ func (u *User) Store(m *domain.User) error {
 	}
 	return nil
 }
+
+func (u *User) GetUser(ctr *domain.UserCriteria) (*domain.User, error) {
+	user, err := u.userRepo.GetUser(ctr)
+	if err != nil {
+		return nil, err
+	}
+
+	return user, nil
+
+}

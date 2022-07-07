@@ -21,3 +21,19 @@ func (u *User) Store(m *domain.User) error {
 	}
 	return nil
 }
+
+func (u *User) GetUser(ctr *domain.UserCriteria) (*domain.User, error) {
+	var user *domain.User
+	q := u.GormDB.
+		Table("users").
+		Where(
+			"email = ?",
+			*ctr.Email,
+		)
+
+	if err := q.Scan(&user).Error; err != nil {
+		return nil, err
+	}
+
+	return user, nil
+}

@@ -18,4 +18,4 @@ export GATEWAY_CONSUL_URL="127.0.0.1:8500"
 export GATEWAY_CONSUL_PATH="gateway"
 
 # start application
-./E-Com-Gateway migrate
+./E-Com-Gateway serve

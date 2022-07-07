@@ -4,6 +4,7 @@ import (
 	"errors"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/rifatikbal/E-Com-Gateway/internal/service"
+	"log"
 	"time"
 )
 
@@ -30,7 +31,7 @@ func New(id *uint64, email *string, secretKey *string, duration *time.Duration) 
 }
 
 func (auth *Authentication) NewToken() (*string, error) {
-	expirationTime := time.Now().Add(auth.Duration * time.Second)
+	expirationTime := time.Now().Add(auth.Duration)
 	claims := JWTClaim{
 		ID:    auth.ID,
 		Email: auth.Email,
@@ -39,8 +40,13 @@ func (auth *Authentication) NewToken() (*string, error) {
 		},
 	}
 
-	token, err := jwt.NewWithClaims(jwt.SigningMethodES512, claims).SignedString([]byte(auth.SecretKey))
+	log.Println(claims)
+
+	log.Println(expirationTime)
+
+	token, err := jwt.NewWithClaims(jwt.SigningMethodHS256, claims).SignedString([]byte(auth.SecretKey))
 	if err != nil {
+		log.Println("failed to log in here: ", err)
 		return nil, err
 	}
 
