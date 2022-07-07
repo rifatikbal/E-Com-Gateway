@@ -19,12 +19,12 @@ type DBCfg struct {
 
 func LoadDBCfg() {
 	db = &DBCfg{
-		Host:            viper.GetString("database.host"),
-		Port:            viper.GetInt("database.port"),
-		User:            viper.GetString("database.user"),
-		Pass:            viper.GetString("database.pass"),
-		Name:            viper.GetString("database.name"),
-		ConnMaxLifetime: viper.GetDuration("database.conn_max_lifetime") * time.Second,
+		Host:            viper.GetString("db.host"),
+		Port:            viper.GetInt("db.port"),
+		User:            viper.GetString("db.user"),
+		Pass:            viper.GetString("db.pass"),
+		Name:            viper.GetString("db.name"),
+		ConnMaxLifetime: viper.GetDuration("db.conn_max_lifetime") * time.Second,
 	}
 }
 

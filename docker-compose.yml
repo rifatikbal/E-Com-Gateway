@@ -6,3 +6,17 @@ services:
     image: consul:latest
     ports:
       - 8500:8500
+
+  database:
+    image: mysql:latest
+    environment:
+      - "MYSQL_ROOT_PASSWORD=secret"
+      - "MYSQL_DATABASE=ecom"
+    ports:
+      - 3306:3306
+  adminer:
+    image: adminer
+    ports:
+      - 9000:8080
+    links:
+      - database:db

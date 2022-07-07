@@ -8,7 +8,9 @@ type User struct {
 }
 
 type UserRepo interface {
+	Store(m *User) error
 }
 
 type UserUseCase interface {
+	Store(m *User) error
 }

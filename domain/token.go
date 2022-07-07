@@ -6,6 +6,7 @@ type Token struct {
 }
 
 type TokenRepo interface {
+	Store(m *Token) error
 }
 
 type TokenUseCase interface {
