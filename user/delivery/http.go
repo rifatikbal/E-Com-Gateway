@@ -35,6 +35,7 @@ func New(r *chi.Mux, userUseCase domain.UserUseCase, authCfg config.AuthCfg) {
 		r.Route("/user", func(r chi.Router) {
 			r.Post("/register", handler.registerUser)
 			r.Post("/login", handler.loginUser)
+			r.Post("/logout", handler.loginUser)
 
 		})
 	})
@@ -89,6 +90,66 @@ func (u *UserHandler) registerUser(w http.ResponseWriter, r *http.Request) {
 }
 
 func (u *UserHandler) loginUser(w http.ResponseWriter, r *http.Request) {
+	loginReq := dto.LoginUserReq{}
+	if err := json.NewDecoder(r.Body).Decode(&loginReq); err != nil {
+		log.Println(err)
+		render.Status(r, http.StatusBadRequest)
+		render.JSON(w, r, map[string]string{
+			"error": err.Error(),
+		})
+
+		return
+	}
+
+	ctr := &domain.UserCriteria{
+		Email: &loginReq.Email,
+	}
+
+	user, err := u.userUseCase.GetUser(ctr)
+	if err != nil {
+		render.Status(r, http.StatusInternalServerError)
+		render.JSON(w, r, map[string]string{
+			"error": err.Error(),
+		})
+
+		return
+	}
+
+	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(loginReq.Password)); err != nil {
+		render.Status(r, http.StatusUnauthorized)
+		render.JSON(w, r, map[string]string{
+			"error": "unauthorized user ",
+		})
+
+		return
+	}
+
+	auth := authSvc.New(&user.ID, &user.Email, &u.authCfg.Secret, &u.authCfg.Duration)
+	log.Println(auth)
+
+	token, err := auth.NewToken()
+	if err != nil {
+		render.Status(r, http.StatusInternalServerError)
+		render.JSON(w, r, map[string]string{
+			"error": "failed to generate token",
+		})
+
+		return
+	}
+
+	http.SetCookie(w, &http.Cookie{
+		Name:    "token",
+		Value:   *token,
+		Expires: time.Now().Add(u.authCfg.Duration),
+	})
+
+	render.Status(r, http.StatusOK)
+	render.JSON(w, r, map[string]string{
+		"success": "true",
+	})
+}
+
+func (u *UserHandler) logoutUser(w http.ResponseWriter, r *http.Request) {
 	loginReq := dto.LoginUserReq{}
 	if err := json.NewDecoder(r.Body).Decode(&loginReq); err != nil {
 		log.Println(err)

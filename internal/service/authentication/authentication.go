@@ -3,6 +3,7 @@ package authentication
 import (
 	"errors"
 	"github.com/dgrijalva/jwt-go"
+	"github.com/rifatikbal/E-Com-Gateway/domain/dto"
 	"github.com/rifatikbal/E-Com-Gateway/internal/service"
 	"log"
 	"time"
@@ -15,24 +16,28 @@ type Authentication struct {
 	Duration  time.Duration
 }
 
-type JWTClaim struct {
-	ID    uint64 `json:"ID"`
-	Email string `json:"email"`
-	jwt.StandardClaims
-}
-
 func New(id *uint64, email *string, secretKey *string, duration *time.Duration) service.AuthenticationSvc {
-	return &Authentication{
-		ID:        *id,
-		Email:     *email,
-		SecretKey: *secretKey,
-		Duration:  *duration,
+	authentication := Authentication{}
+
+	if id != nil {
+		authentication.ID = *id
 	}
+	if email != nil {
+		authentication.Email = *email
+	}
+	if secretKey != nil {
+		authentication.SecretKey = *secretKey
+	}
+	if duration != nil {
+		authentication.Duration = *duration
+	}
+
+	return &authentication
 }
 
 func (auth *Authentication) NewToken() (*string, error) {
 	expirationTime := time.Now().Add(auth.Duration)
-	claims := JWTClaim{
+	claims := dto.JWTClaim{
 		ID:    auth.ID,
 		Email: auth.Email,
 		StandardClaims: jwt.StandardClaims{
@@ -53,28 +58,28 @@ func (auth *Authentication) NewToken() (*string, error) {
 	return &token, nil
 }
 
-func (auth *Authentication) ValidateToken(signedToken string) error {
-	token, err := jwt.ParseWithClaims(signedToken, &JWTClaim{}, func(token *jwt.Token) (interface{}, error) {
+func (auth *Authentication) ValidateToken(signedToken string) (*dto.JWTClaim, error) {
+	token, err := jwt.ParseWithClaims(signedToken, &dto.JWTClaim{}, func(token *jwt.Token) (interface{}, error) {
 		return []byte(auth.SecretKey), nil
 	})
 
 	if err != nil {
-		return err
+		return nil, err
 	}
-	claims, ok := token.Claims.(*JWTClaim)
+	claims, ok := token.Claims.(*dto.JWTClaim)
 	if !ok {
 		err := errors.New("could not parse claims")
-		return err
+		return nil, err
 	}
 
 	if claims.Email != auth.Email || claims.ID != auth.ID {
 		err := errors.New("unauthorised entity")
-		return err
+		return nil, err
 	}
 
 	if time.Unix(claims.ExpiresAt, 0).Before(time.Now()) {
 		err := errors.New("token expired")
-		return err
+		return nil, err
 	}
-	return nil
+	return claims, nil
 }

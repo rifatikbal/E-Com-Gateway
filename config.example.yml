@@ -14,3 +14,6 @@ DB:
   pass: secret
   name: ecom
   conn_max_lifetime: 30
+
+PMS:
+  url: "127.0.0.1:8081"
