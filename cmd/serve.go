@@ -25,6 +25,7 @@ var serveCmd = &cobra.Command{
 		config.LoadDBCfg()
 		config.LoadAppCfg()
 		config.LoadAuthCfg()
+		config.LoadPMSCfg()
 
 		if err := conn.ConnectDB(config.DB()); err != nil {
 			log.Println(err)
