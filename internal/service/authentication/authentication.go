@@ -2,6 +2,7 @@ package authentication
 
 import (
 	"errors"
+	"fmt"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/rifatikbal/E-Com-Gateway/domain/dto"
 	"github.com/rifatikbal/E-Com-Gateway/internal/service"
@@ -38,7 +39,6 @@ func New(id *uint64, email *string, secretKey *string, duration *time.Duration) 
 func (auth *Authentication) NewToken() (*string, error) {
 	expirationTime := time.Now().Add(auth.Duration)
 	claims := dto.JWTClaim{
-		ID:    auth.ID,
 		Email: auth.Email,
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: expirationTime.Unix(),
@@ -59,25 +59,27 @@ func (auth *Authentication) NewToken() (*string, error) {
 }
 
 func (auth *Authentication) ValidateToken(signedToken string) (*dto.JWTClaim, error) {
-	token, err := jwt.ParseWithClaims(signedToken, &dto.JWTClaim{}, func(token *jwt.Token) (interface{}, error) {
+	claims := &dto.JWTClaim{}
+	token, err := jwt.ParseWithClaims(signedToken, claims, func(token *jwt.Token) (interface{}, error) {
 		return []byte(auth.SecretKey), nil
 	})
 
 	if err != nil {
+		log.Println("buggy: ", err.Error())
 		return nil, err
 	}
+
 	claims, ok := token.Claims.(*dto.JWTClaim)
 	if !ok {
+		log.Println("xyz")
 		err := errors.New("could not parse claims")
 		return nil, err
 	}
 
-	if claims.Email != auth.Email || claims.ID != auth.ID {
-		err := errors.New("unauthorised entity")
-		return nil, err
-	}
+	fmt.Println("buggybot ", claims.Email, " ", claims.ExpiresAt)
 
 	if time.Unix(claims.ExpiresAt, 0).Before(time.Now()) {
+		log.Println("here")
 		err := errors.New("token expired")
 		return nil, err
 	}

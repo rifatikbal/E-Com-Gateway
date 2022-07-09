@@ -10,9 +10,12 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/spf13/cobra"
 
+	pmsHttpDelivery "github.com/rifatikbal/E-Com-Gateway/PMS/delivery"
 	"github.com/rifatikbal/E-Com-Gateway/internal/config"
 	"github.com/rifatikbal/E-Com-Gateway/internal/conn"
+	authSvc "github.com/rifatikbal/E-Com-Gateway/internal/service/authentication"
 	userHttpDelivery "github.com/rifatikbal/E-Com-Gateway/user/delivery"
+
 	userRepo "github.com/rifatikbal/E-Com-Gateway/user/repository"
 	userUseCase "github.com/rifatikbal/E-Com-Gateway/user/usecase"
 )
@@ -38,12 +41,16 @@ var serveCmd = &cobra.Command{
 		userRepo := userRepo.New(conn.GetDB())
 		userUC := userUseCase.New(userRepo)
 
+		authSvc := authSvc.New(nil, nil, &config.Auth().Secret, nil)
+
 		r := chi.NewRouter()
 
 		apiRouter := chi.NewRouter()
 		r.Mount("/api", apiRouter)
 
 		userHttpDelivery.New(apiRouter, userUC, *config.Auth())
+
+		pmsHttpDelivery.New(apiRouter, authSvc, *config.PMS())
 
 		quit := make(chan os.Signal, 1)
 		signal.Notify(quit, os.Interrupt)

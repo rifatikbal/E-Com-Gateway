@@ -4,7 +4,7 @@ app:
 
 auth:
   secret: my_secret_key
-  duration: 100 #second
+  duration: 100000 #second
   hash_cost: 14
 
 DB:
@@ -12,8 +12,8 @@ DB:
   port: 3306
   user: root
   pass: secret
-  name: ecom
+  name: gateway
   conn_max_lifetime: 30
 
 PMS:
-  url: "127.0.0.1:8081"
+  url: "http://127.0.0.1:8081"

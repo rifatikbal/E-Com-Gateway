@@ -1,6 +1,6 @@
 #! /bin/bash
 
-docker-compose up -d
+#docker-compose up -d
 
 set -e
 set -o pipefail
